@@ -1,0 +1,187 @@
+%header%
+GRAMMARTYPE = "LL"
+
+
+%tokens%
+//For polispeak, white space is semi-ignored
+WHITESPACE = <<[ \t\n\r]+>> %ignore%  //ignore tag to discard such tokens
+
+STRING = <<\".*?\">>
+
+INTEGER = <<(^-?[0-9]+)>>  //includes shorts and bytes
+DOUBLE = <<(^-?\d+\.\d+)>>
+
+//INTRO TOKENS
+RESOL_PHRASE = "RESOLUTION"
+TO_PHRASE = "To"
+
+//SECTION TOKENS
+SECTION_PHRASE = "Section"
+PROV_PHRASE = "- Provisions to this Section are:"
+SECTION_CONC_PHRASE = "This concludes Section"
+RESULT_PHRASE = "- The fulfillment of this Section results in"
+
+//DEFINITION TOKENS
+DEF_PHRASE = "Definition of"
+
+//Type Tokens
+AN_PHRASE = "An"
+A_PHRASE = "A"
+DESIG_PHRASE = "designated as"
+REGARDS = "In Regards to"
+THE_PHRASE = "The"
+NULL = "Null"
+
+//RESERVED NAMES
+INT_PHRASE = "Integer"
+STR_PHRASE = "String"
+FLOAT_PHRASE = "Float"
+UNKNOWN = "Unknown"
+
+//Local variable tokens
+WITHIN = "Within this new context, set"
+TO_BE = "to be a"
+WHOSE = "whose value is"
+
+SHALL = "shall be"
+HOLD = "with an initial hold of"
+RESPECT = "with respect to the creation of this new context"
+
+//Type instan. tokens
+APPROP = "Appropriate the creation of"
+WITH = "with the given provisions of"
+AND = "and"
+
+THE = "The appropriation of"
+
+//Conditionals tokens
+CASE = "In the case of"
+BEING = "being true, then this section mandates that"
+FULFILLED = "is fulfilled"
+
+//Function invocation tokens
+INVOKE = "Invoke Section"
+INVOKING = "Invoking Section"
+THE_INVOCATION = "The invocation of Section"
+
+HOWEVER = "However, if such case isn’t true, then this Section mandates the fulfillment of"
+
+//variable referral tokens
+REFERRING = "Referring to"
+CUR_CONTEXT = "within the current context"
+
+WHATEVER = "Whatever is held by"
+
+//Instance variable tokens
+HELD = "The value held under"
+FROM = "from"
+
+AUDIT = "Audit"
+ASSET = "for the asset held by its component named"
+
+//PUNCUTATION MARKS
+COLON = ":"
+S_QUOTE = "'"
+COMMA = ","
+HYPHEN = "-"
+PERIOD = "."
+OP_PAREN = "("
+CL_PAREN = ")"
+SEMICOLON = ";"
+
+NAME = <<[a-zA-Z][a-zA-Z0-9_]*>>  //reduce spaces between "<<" and ">>"
+
+/*
+//arithmetic tokens
+MULT = "Multiply"
+INC = "Increase"
+DEC = "decreased by"
+DIV = "divided by"
+
+WITH_ARITH = "with"
+BY = "by"
+
+LESS = "less than"
+GREAT = "greater than"
+EQUAL = "of the same worth"
+*/
+
+%productions%
+bill = intro;
+       
+intro = resol_intro bill_desc (section | definitions)*;
+       
+resol_intro = RESOL_PHRASE INTEGER COLON STRING;
+bill_desc = TO_PHRASE STRING;
+
+definitions = DEF_PHRASE S_QUOTE NAME S_QUOTE COLON (definition_param)*; 
+definition_param = HYPHEN param PERIOD; 
+
+section = section_intro [section_prov] [section_return] (step)* section_conc;
+section_conc = SECTION_CONC_PHRASE INTEGER;
+
+section_intro = SECTION_PHRASE INTEGER [HYPHEN STRING] COLON;
+section_prov = PROV_PHRASE param (COMMA param)* [COMMA AND param] PERIOD; 
+section_return = RESULT_PHRASE type_description PERIOD;
+
+param = type_description DESIG_PHRASE S_QUOTE NAME S_QUOTE;
+
+type_description = [external_bill] (AN_PHRASE | A_PHRASE) type;
+type = INT_PHRASE | STR_PHRASE | FLOAT_PHRASE | NAME | UNKNOWN;
+
+external_bill = REGARDS STRING COMMA;
+
+step = (
+          var_step |
+          type_instant_step | 
+          conditional_step |
+          func_invoc_step | 
+          var_ref_step |
+          instance_mem_step |
+          atoms
+          
+          /*
+          mul_step | 
+          add_step |
+          sub_step | 
+          div_step |
+          less_step | 
+          great_step |
+          equal_step
+          */
+        ) [PERIOD | COMMA];
+
+var_step = ( 
+             (WITHIN S_QUOTE NAME S_QUOTE TO_BE type_description WHOSE COLON step) | 
+             (S_QUOTE NAME S_QUOTE SHALL type_description HOLD COLON step RESPECT) 
+           ) COLON (step)+;
+           
+type_instant_step = (APPROP type_description | 
+                     THE type_description ) 
+                     [WITH step (SEMICOLON step)* [SEMICOLON AND step]];
+                    
+conditional_step = CASE step BEING step FULFILLED HOWEVER step;
+                    
+func_invoc_step = [external_bill] 
+                  ((INVOKE) | (INVOKING) | (THE_INVOCATION)) 
+                  INTEGER 
+                  [WITH COLON step (SEMICOLON step)* [SEMICOLON AND step]];        
+         
+var_ref_step = (REFERRING S_QUOTE NAME S_QUOTE CUR_CONTEXT) |
+               (WHATEVER S_QUOTE NAME S_QUOTE);
+
+instance_mem_step = (HELD S_QUOTE NAME S_QUOTE FROM step) | 
+                    (AUDIT step ASSET NAME);
+                    
+atoms = (THE_PHRASE (INT_PHRASE INTEGER |  FLOAT_PHRASE DOUBLE | STR_PHRASE STRING) ) | 
+        NULL;
+/*
+mul_step = step MULT step;
+add_step = step INC step;
+sub_step = step DEC step;
+div_step = step DIV step;
+
+less_step = step LESS step;
+great_step = step GREAT step;
+equal_step = step EQUAL step;
+*/
