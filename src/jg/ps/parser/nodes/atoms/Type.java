@@ -7,6 +7,7 @@ public class Type extends Atom<String>{
   public static final Type STR_TYPE = new Type(-1, -1, "String", "The Constitution");
   public static final Type UNKNOWN_TYPE = new Type(-1, -1, "Unknown", "The Constitution");
   public static final Type NULL_TYPE = new Type(-1, -1, "Null", "The Constitution");
+  public static final Type VOID_TYPE = new Type(-1, -1, "Void", "The Constitution");
   
   private final String hostBill;
   private final String typeName;

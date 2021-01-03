@@ -1,5 +1,6 @@
 package jg.ps;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import jg.ps.parser.nodes.constructs.Legislation;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    System.out.println("---POLISPEAK v1.0---");
+    System.out.println("---POLISPEAK v1.0--- "+Arrays.toString("$what".split("\\$")));
         
     //System.out.println(TheConstitution.createTheConstitution().getConstitution());
     

@@ -138,7 +138,7 @@ public class Executive {
         provs[i] = fulfillStep(invocation.getProvisions()[i], currentBill, vMap);
       }
       
-      System.out.println("---FULFILLING SECTION "+targetSection.getSectionNumber()+" of "+hostBill.getName());
+      //System.out.println("---FULFILLING SECTION "+targetSection.getSectionNumber()+" of "+hostBill.getName());
       
       if (virtualSections.containsKey(hostBill.getName())) {
         return virtualSections.get(hostBill.getName()).get(targetSection.getSectionNumber() - 1).fulfill(provs);

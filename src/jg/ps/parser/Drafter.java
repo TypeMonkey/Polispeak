@@ -30,7 +30,8 @@ import net.percederberg.grammatica.parser.Token;
  *
  */
 public class Drafter {
-
+  
+  private final Map<String, Legislation> precedents; //founding legislation
   private final String [] bills;
   
   /**
@@ -38,10 +39,11 @@ public class Drafter {
    * @param the paths of all Bills to check
    */
   public Drafter(String ... bills) {
+    this.precedents = new HashMap<>();
     this.bills = bills;
   }
   
-  public Map<String, Legislation> draftLegislation(){
+  public Map<String, Legislation> draftLegislation(Class<?> ... precedents){
     HashMap<String, Legislation> allBills = new HashMap<>();
     
     //parse the bills first
@@ -125,9 +127,9 @@ public class Drafter {
       tokens.add(current);
     }
     
-    System.out.println("-------TOKENS FOR "+path.getName()+"----------");
-    tokens.forEach(x -> System.out.println(x));
-    System.out.println("-------TOKENS END FOR "+path.getName()+"----------");
+    //System.out.println("-------TOKENS FOR "+path.getName()+"----------");
+    //tokens.forEach(x -> System.out.println(x));
+    //System.out.println("-------TOKENS END FOR "+path.getName()+"----------");
     
     ResolutionBuilder billBuilder = new ResolutionBuilder(getBareFileName(path.getName()));
     PolispeakParser parser = new PolispeakParser(null, billBuilder);
