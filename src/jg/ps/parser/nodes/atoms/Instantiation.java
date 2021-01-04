@@ -4,17 +4,25 @@ import java.util.Arrays;
 
 import jg.ps.parser.nodes.Expr;
 
-public class Instanciation extends Atom<Type>{
+/**
+ * Describes the instantiation of a definition.
+ * @author Jose
+ */
+public class Instantiation extends Atom<Type>{
 
   private final Expr [] provisions;
   
-  public Instanciation(int line, int column, Type value, Expr ... provisions) {
+  public Instantiation(int line, int column, Type value, Expr ... provisions) {
     super(value, line, column);
     this.provisions = provisions;
   }
   
   public Expr[] getProvisions() {
     return provisions;
+  }
+  
+  public int getProvisionCount() {
+    return provisions.length;
   }
   
   public Type getType() {

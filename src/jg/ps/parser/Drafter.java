@@ -11,8 +11,7 @@ import java.util.Map;
 import jg.ps.cohesion.TypeChecker;
 import jg.ps.cohesion.Validator;
 import jg.ps.common.LegislativeException;
-import jg.ps.common.TheConstitution;
-import jg.ps.common.precedent.PrecedentAnalyzer;
+import jg.ps.common.Utilities;
 import jg.ps.common.precedent.PrecedentPresenter;
 import jg.ps.parser.nodes.constructs.Legislation;
 import net.percederberg.grammatica.parser.ParseException;
@@ -40,31 +39,28 @@ public class Drafter {
     this.bills = bills;
   }
   
-  public Map<String, Legislation> draftLegislation(Map<String, PrecedentPresenter> precedents){
+  /**
+   * Drafts the bills constructed with this Drafter,
+   * performing grammar, structure and type checks.
+   * 
+   * @param precedents - Precedents that the bills draw upon from
+   * @return the verified Legislation ready for enforcement
+   * 
+   * @throws Exception - parser error , Legislation error due to validation
+   */
+  public Map<String, Legislation> draftLegislation(Map<String, PrecedentPresenter> precedents) throws Exception{
     HashMap<String, Legislation> allBills = new HashMap<>();
     
     //parse the bills first
     for (String billPath : bills) {
-      try {
-        System.out.println("----PARSING: "+billPath);
-        Legislation bill = parseBill(new File(billPath));
-        allBills.put(getBareFileName(billPath), bill);
-      } catch (LegislativeException e) {
-        System.err.print(e.getMessage());
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      //System.out.println("----PARSING: "+billPath);
+      Legislation bill = parseBill(new File(billPath));
+      allBills.put(bill.getName(), bill);
     }
     
     //construct the constitution, and other founding legislation
     for(PrecedentPresenter presenter : precedents.values()) {
       allBills.put(presenter.getRep().getName(), presenter.getRep());
-    }
-    
-    //WARN USER if there's precedent called "The Constitution" that's not jg.ps.common.TheConsitution
-    if (precedents.containsKey("The Constitution") && 
-        precedents.get("The Constitution").getBackingClass() != TheConstitution.class) {
-      System.err.println("WARNING: The Constitution being used isn't the one that was drafted by the Founding Fathers!");
     }
     
     //now continue with validating the submitted legislation  
@@ -120,26 +116,12 @@ public class Drafter {
     //tokens.forEach(x -> System.out.println(x));
     //System.out.println("-------TOKENS END FOR "+path.getName()+"----------");
     
-    ResolutionBuilder billBuilder = new ResolutionBuilder(getBareFileName(path.getName()));
+    String fileName = Utilities.getBareFileName(path.getName());
+    
+    ResolutionBuilder billBuilder = new ResolutionBuilder(fileName);
     PolispeakParser parser = new PolispeakParser(null, billBuilder);
     parser.parseFromTokenList(tokens);
     
-    Legislation bill = billBuilder.produceBill();
-    return bill;
-  }
-  
-  /**
-   * Returns the name of a file, without its extension
-   * @param rawFileName - the name of the file, potentially having its extension
-   * @return the name of a file, without its extension
-   */
-  public static String getBareFileName(String rawFileName) {
-    int dotIndex = rawFileName.indexOf('.');
-    if (dotIndex == -1) {
-      return rawFileName;
-    }
-    else {
-      return rawFileName.substring(0, dotIndex);
-    }
+    return billBuilder.produceBill();
   }
 }

@@ -6,16 +6,38 @@ import java.util.Map.Entry;
 import jg.ps.parser.nodes.Expr;
 import jg.ps.parser.nodes.atoms.Type;
 
+/**
+ * A section is the most basic body of procedure 
+ * in a legislation, at least in Polispeak.
+ * 
+ * Sections are uniquely identified by their section number - which
+ * is assigned with respect to other sections in their host legislation,
+ * with the top most section being assigned 1.
+ * 
+ * In software development, section = function and so, the provisions
+ * to a section are it's parameters. 
+ * 
+ * @author Jose
+ */
 public class Section extends Expr{
 
   private final int sectionNumber;
   private final String sectionTitle;
   private final Type resultType;
-  //private final String sectionDesc;
   
   private final LinkedHashMap<String, Type> provisions;
   private final Expr [] body;
   
+  /**
+   * Constructs a Section
+   * @param line - the starting line number of this Section
+   * @param column - the starting column number of this Section
+   * @param sectionNumber - the positive, non-zero integer that uniquely identifies this Section
+   * @param sectionTitle - the title of this Section that briefly describes its purpose
+   * @param provisions - A mapping that describes the amount, order and type of this Section's provisions
+   * @param resultType - the resulting type of enforcing this Section
+   * @param body - the procedures that makeup this Section
+   */
   public Section(int line, 
                  int column, 
                  int sectionNumber, 
@@ -35,12 +57,6 @@ public class Section extends Expr{
   public boolean isTitled() {
     return sectionTitle != null;
   }
-  
-  /*
-  public boolean hasDescription() {
-    return sectionDesc != null;
-  }
-  */
   
   public boolean isNotVoid() {
     return !resultType.equals(Type.VOID_TYPE);
@@ -64,6 +80,10 @@ public class Section extends Expr{
   
   public String getSectionTitle() {
     return sectionTitle;
+  }
+  
+  public int getProvisionCount() {
+    return provisions.size();
   }
   
   /*

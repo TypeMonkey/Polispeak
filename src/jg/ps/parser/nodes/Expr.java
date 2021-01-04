@@ -1,14 +1,8 @@
 package jg.ps.parser.nodes;
 
 /**
- * Represents a grammatically valid Seahorse expression - arithmetic, structural, etc.
- * 
- * An Expr doesn't necessarily represent a valid Seahorse expression.
- * For example, expressions that refer to a undefined variable aren't valid, but 
- * are grammatically valid.
- * 
+ * Represents a grammatically valid Polispeak expression.
  * @author Jose
- *
  */
 public abstract class Expr {
 
@@ -19,16 +13,6 @@ public abstract class Expr {
     this.line = line;
     this.column = column;
   }
-  
-  /*
-  public void setType(GenType type){
-    this.attachedType = type;
-  }
-  
-  public GenType getType() {
-    return attachedType;
-  }
-  */
   
   public int getLineNumber() {
     return line;

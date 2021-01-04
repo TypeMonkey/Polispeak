@@ -19,7 +19,7 @@ import jg.ps.parser.nodes.InstanceDeref;
 import jg.ps.parser.nodes.Invocation;
 import jg.ps.parser.nodes.LocalVarDeclr;
 import jg.ps.parser.nodes.atoms.Identifier;
-import jg.ps.parser.nodes.atoms.Instanciation;
+import jg.ps.parser.nodes.atoms.Instantiation;
 import jg.ps.parser.nodes.atoms.Type;
 import jg.ps.parser.nodes.constructs.Legislation;
 import jg.ps.parser.nodes.constructs.Definition;
@@ -107,8 +107,8 @@ public class Validator {
                                                 curBill));
       }
     }
-    else if (expr instanceof Instanciation) {
-      Instanciation instanciation = (Instanciation) expr;
+    else if (expr instanceof Instantiation) {
+      Instantiation instanciation = (Instantiation) expr;
       exceptions.addAll(validateType(instanciation.getType(), curBill));
       
       for(Expr prov : instanciation.getProvisions()) {

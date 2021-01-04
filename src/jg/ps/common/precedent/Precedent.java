@@ -22,6 +22,13 @@ import java.lang.annotation.Target;
  *      
  * Note: A precedent can only utilize types that's within itself or inside other precedents
  * 
+ * Using precedents: When enforcing legislation, the Polispeak Interpreter has an option
+ *                   to include the path of a directory containing precedents to account for. 
+ *                   
+ *                   To use precedents of your own, make a directory and in it, place the 
+ *                   .class files which are the compiled Precedents to use, and pass the directory's
+ *                   location to the Polispeak Interpreter.
+ * 
  * Example use of the Precedent annotations:
  * 
  * @Precedent(title="Basic Procedures for Voting")

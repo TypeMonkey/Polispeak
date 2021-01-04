@@ -18,12 +18,12 @@ import jg.ps.parser.nodes.Expr;
 import jg.ps.parser.nodes.InstanceDeref;
 import jg.ps.parser.nodes.Invocation;
 import jg.ps.parser.nodes.LocalVarDeclr;
-import jg.ps.parser.nodes.atoms.FloatValue;
+import jg.ps.parser.nodes.atoms.FloatAtom;
 import jg.ps.parser.nodes.atoms.Identifier;
-import jg.ps.parser.nodes.atoms.Instanciation;
-import jg.ps.parser.nodes.atoms.Int;
+import jg.ps.parser.nodes.atoms.Instantiation;
+import jg.ps.parser.nodes.atoms.IntAtom;
 import jg.ps.parser.nodes.atoms.NullValue;
-import jg.ps.parser.nodes.atoms.Str;
+import jg.ps.parser.nodes.atoms.StrAtom;
 import jg.ps.parser.nodes.atoms.Type;
 import jg.ps.parser.nodes.constructs.Legislation;
 import jg.ps.parser.nodes.constructs.Definition;
@@ -97,20 +97,20 @@ public class TypeChecker {
       Identifier identifier = (Identifier) expr;
       return find(vars, identifier.getIdentifier());
     }
-    else if (expr instanceof FloatValue) {
+    else if (expr instanceof FloatAtom) {
       return Type.FLOAT_TYPE;
     }
-    else if (expr instanceof Int) {
+    else if (expr instanceof IntAtom) {
       return Type.INT_TYPE;
     }
-    else if (expr instanceof Str) {
+    else if (expr instanceof StrAtom) {
       return Type.STR_TYPE;
     }
     else if (expr instanceof NullValue) {
       return Type.NULL_TYPE;
     }
-    else if (expr instanceof Instanciation) {
-      Instanciation instanciation = (Instanciation) expr;
+    else if (expr instanceof Instantiation) {
+      Instantiation instanciation = (Instantiation) expr;
       
       if (instanciation.getType().equals(Type.VOID_TYPE) || 
           instanciation.getType().equals(Type.NULL_TYPE)) {
@@ -188,6 +188,8 @@ public class TypeChecker {
                                        conditional.getColumnNumber(), 
                                        curBill.getName());
       }
+      
+      return trueRoute;
     }
     else if (expr instanceof InstanceDeref) {
       InstanceDeref deref = (InstanceDeref) expr;

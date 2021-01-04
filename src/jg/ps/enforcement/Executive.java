@@ -23,12 +23,12 @@ import jg.ps.parser.nodes.Expr;
 import jg.ps.parser.nodes.InstanceDeref;
 import jg.ps.parser.nodes.Invocation;
 import jg.ps.parser.nodes.LocalVarDeclr;
-import jg.ps.parser.nodes.atoms.FloatValue;
+import jg.ps.parser.nodes.atoms.FloatAtom;
 import jg.ps.parser.nodes.atoms.Identifier;
-import jg.ps.parser.nodes.atoms.Instanciation;
-import jg.ps.parser.nodes.atoms.Int;
+import jg.ps.parser.nodes.atoms.Instantiation;
+import jg.ps.parser.nodes.atoms.IntAtom;
 import jg.ps.parser.nodes.atoms.NullValue;
-import jg.ps.parser.nodes.atoms.Str;
+import jg.ps.parser.nodes.atoms.StrAtom;
 import jg.ps.parser.nodes.atoms.Type;
 import jg.ps.parser.nodes.constructs.Definition;
 import jg.ps.parser.nodes.constructs.Legislation;
@@ -111,27 +111,27 @@ public class Executive {
   }
   
   private Instance fulfillStep(Expr step, String currentBill, List<Map<String, Instance>> vMap) {
-    if (step instanceof FloatValue) {
-      FloatValue value = (FloatValue) step;
+    if (step instanceof FloatAtom) {
+      FloatAtom value = (FloatAtom) step;
       return new FloatInstance(value.getActualValue());
     }
     else if (step instanceof Identifier) {
       Identifier identifier = (Identifier) step;
       return find(vMap, identifier.getActualValue());
     }
-    else if (step instanceof Int) {
-      Int integer = (Int) step;
+    else if (step instanceof IntAtom) {
+      IntAtom integer = (IntAtom) step;
       return new IntValue(integer.getActualValue());
     }
     else if (step instanceof NullValue) {
       return NullInstance.getNullInstance();
     }
-    else if (step instanceof Str) {
-      Str str = (Str) step;
+    else if (step instanceof StrAtom) {
+      StrAtom str = (StrAtom) step;
       return new StringInstance(str.getActualValue());
     }
-    else if (step instanceof Instanciation) {
-      Instanciation instanciation = (Instanciation) step;
+    else if (step instanceof Instantiation) {
+      Instantiation instanciation = (Instantiation) step;
       
       Legislation hostLegislations = legislations.get(instanciation.getType().getHostBill());
       Definition definition = hostLegislations.getDefinitons().get(instanciation.getType().getTypeName());

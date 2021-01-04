@@ -1,0 +1,72 @@
+
+RESOLUTION 1: "Hello World Act"
+
+To "set procedures for announcing existence, in the matter of national security"
+
+Section 1 - "Hello World" :
+
+In Regards to "The Constitution", Invoke Section 20 with the given provisions of:
+	In Regards to "The Bill of Strings", Invoke Section 1 with the given provisions of:
+		The String "Hello";
+		and The String " World"
+		
+In Regards to "The Constitution", Invoke Section 20 with the given provisions of:
+	The String "Enter a positive integer:"
+		
+'input' shall be An Integer with an initial hold of:
+    In Regards to "The Bill of Strings", Invoke Section 8 with the given provisions of:
+         In Regards to "The Constitution", Invoke Section 19 
+         
+with respect to the creation of this new context:   
+	In Regards to "The Constitution", Invoke Section 20 with the given provisions of:
+	    In Regards to "The Bill of Strings", Invoke Section 6 with the given provisions of:		     
+	       Invoking Section 3 with the given provisions of:
+	         Whatever is held by 'input'
+
+This concludes Section 1
+
+
+Section 2 - "Decrement Procedure" :
+- Provisions to this Section are: An Integer designated as 'x'.
+- The fulfillment of this Section results in An Integer.
+
+'one' shall be An Integer with an initial hold of:
+   In Regards to "The Constitution", Invoke Section 13 with the given provisions of: The Integer 1
+   
+with respect to the creation of this new context:
+   In Regards to "The Constitution", Invoke Section 1 with the given provisions of:
+     Whatever is held by 'x';
+     and Whatever is held by 'one'   	
+     
+This concludes Section 2
+
+
+Section 3 - "Factorial Procedure" :
+- Provisions to this Section are: An Integer designated as 'x'. 
+- The fulfillment of this Section results in An Integer.
+
+'res' shall be An Integer with an initial hold of:
+   In Regards to "The Constitution", Invoke Section 16 with the given provisions of:
+      Whatever is held by 'x';
+      and The Integer 1
+
+with respect to the creation of this new context:
+      
+In the case of Whatever is held by 'res' being true, then this section mandates that
+   
+   Whatever is held by 'res' , is fulfilled
+   
+   However, if such case isn’t true, then this Section mandates the fulfillment of
+   
+   In Regards to "The Constitution", Invoke Section 5 with the given provisions of:
+     Whatever is held by 'x';
+     and Invoking Section 3 with the given provisions of:
+         Invoking Section 2 with the given provisions of:
+             Whatever is held by 'x'
+          
+This concludes Section 3
+
+
+Definition of 'SomeType':
+- An Integer designated as 'val' .
+- An Unknown designated as 'name' .

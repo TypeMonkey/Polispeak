@@ -98,4 +98,24 @@ public class BillOfStrings {
 
     return new StringInstance(String.valueOf(floatValue.getValue()));
   }
+  
+  @PrecSection(num = 8,
+      title = "The Transformation Law",
+      provisions = {"$String"},
+      fulfillment = "$Integer")
+  public static Instance transformFromInt(Instance target) {
+    StringInstance str = (StringInstance) target;        
+
+    return new IntValue(Long.parseLong(str.getValue()));
+  }
+  
+  @PrecSection(num = 9,
+      title = "The Transformation Law",
+      provisions = {"$String"},
+      fulfillment = "$Float")
+  public static Instance transformFromFloat(Instance target) {
+    StringInstance str = (StringInstance) target;        
+
+    return new FloatInstance(Double.parseDouble(str.getValue()));
+  }
 }

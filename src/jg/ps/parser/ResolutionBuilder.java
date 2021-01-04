@@ -10,18 +10,19 @@ import jg.ps.parser.errors.BadConclusionException;
 import jg.ps.parser.errors.BadSectionSequenceException;
 import jg.ps.parser.errors.DuplicateDefinitionException;
 import jg.ps.parser.errors.DuplicateSectionException;
+import jg.ps.parser.errors.WrongLegislationNameException;
 import jg.ps.parser.nodes.Conditional;
 import jg.ps.parser.nodes.Expr;
 import jg.ps.parser.nodes.ExternalBillRef;
 import jg.ps.parser.nodes.Invocation;
 import jg.ps.parser.nodes.LocalVarDeclr;
-import jg.ps.parser.nodes.atoms.FloatValue;
+import jg.ps.parser.nodes.atoms.FloatAtom;
 import jg.ps.parser.nodes.atoms.Identifier;
-import jg.ps.parser.nodes.atoms.Instanciation;
-import jg.ps.parser.nodes.atoms.Int;
+import jg.ps.parser.nodes.atoms.Instantiation;
+import jg.ps.parser.nodes.atoms.IntAtom;
 import jg.ps.parser.nodes.atoms.Keyphrase;
 import jg.ps.parser.nodes.atoms.NullValue;
-import jg.ps.parser.nodes.atoms.Str;
+import jg.ps.parser.nodes.atoms.StrAtom;
 import jg.ps.parser.nodes.atoms.Type;
 import jg.ps.parser.nodes.constructs.Legislation;
 import jg.ps.parser.nodes.constructs.Definition;
@@ -80,20 +81,20 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
     content = content.substring(1);
     content = content.substring(0, content.length() - 1);
     
-    actualNodes.push(new Str(content, node.getStartLine(), node.getStartColumn()));
+    actualNodes.push(new StrAtom(content, node.getStartLine(), node.getStartColumn()));
     
     return node;
   }
   
   @Override
   protected Node exitInteger(Token node) throws ParseException {
-    actualNodes.push(new Int(Long.parseLong(node.getImage()), node.getStartLine(), node.getStartColumn()));
+    actualNodes.push(new IntAtom(Long.parseLong(node.getImage()), node.getStartLine(), node.getStartColumn()));
     return node;
   }
   
   @Override
   protected Node exitDouble(Token node) throws ParseException {
-    actualNodes.push(new FloatValue(Double.parseDouble(node.getImage()), node.getStartLine(), node.getStartColumn()));
+    actualNodes.push(new FloatAtom(Double.parseDouble(node.getImage()), node.getStartLine(), node.getStartColumn()));
     return node;
   }
   
@@ -152,9 +153,18 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
   protected Node exitBill(Production node) throws ParseException {
     ArrayDeque<Expr> exprs = exitEntrance();
 
-    Int resolutionNumber = (Int) exprs.pollFirst();
-    Str resolutionTitle = (Str) exprs.pollFirst();
-    Str resolutionDescription = (Str) exprs.pollFirst();
+    IntAtom resolutionNumber = (IntAtom) exprs.pollFirst();
+    StrAtom resolutionTitle = (StrAtom) exprs.pollFirst();
+    
+    //The title of the legislation in the bill itself MUST MATCH the name of the file it's in
+    if (!resolutionTitle.getActualValue().equals(billName)) {
+      throw new WrongLegislationNameException(resolutionTitle.getActualValue(), 
+                                              resolutionTitle.getLineNumber(), 
+                                              resolutionTitle.getColumnNumber(),
+                                              billName);
+    }
+    
+    StrAtom resolutionDescription = (StrAtom) exprs.pollFirst();
     
     LinkedHashMap<String, Section> sections = new LinkedHashMap<>();
     HashMap<String, Definition> definitions = new HashMap<>();
@@ -250,14 +260,14 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
     ArrayDeque<Expr> exprs = exitEntrance();
 
     //retrieve section number, and optionally its description
-    Int secNumber =  ((Int) exprs.pollFirst());
+    IntAtom secNumber =  ((IntAtom) exprs.pollFirst());
     String secTitle = null;
     
     if (exprs.peekFirst() instanceof Keyphrase) {
       //hypen detected so there's a title
       exprs.pollFirst(); //remove hypen
       
-      Str title = (Str) exprs.pollFirst();
+      StrAtom title = (StrAtom) exprs.pollFirst();
       secTitle = title.getActualValue();
     }
     
@@ -281,7 +291,7 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
     //the last expression in "exprs" is from the concluding statement of the section.
     //By our grammar, this expression is an Int.
     //Make sure this integer is equal to the section number
-    Int concludeNum = (Int) exprs.pollFirst();
+    IntAtom concludeNum = (IntAtom) exprs.pollFirst();
     if (!secNumber.getActualValue().equals(concludeNum.getActualValue())) {
       //throw error
       throw new BadConclusionException(secNumber.getActualValue().intValue(), 
@@ -382,7 +392,7 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
       provisions[i] = exprs.pollFirst();
     }
     
-    Instanciation instanciation = new Instanciation(type.getLineNumber(), 
+    Instantiation instanciation = new Instantiation(type.getLineNumber(), 
                                                     type.getColumnNumber(), 
                                                     type, 
                                                     provisions);
@@ -452,7 +462,7 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
   protected Node exitExternalBill(Production node) throws ParseException {
     ArrayDeque<Expr> exprs = exitEntrance();
 
-    Str externalBillName = (Str) exprs.pollFirst();
+    StrAtom externalBillName = (StrAtom) exprs.pollFirst();
     
     actualNodes.push(new ExternalBillRef(externalBillName.getLineNumber(), 
                                          externalBillName.getColumnNumber(), 
@@ -478,7 +488,7 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
       hostBill = externalBillRef.getBillName();
     }
     
-    Int sectionNumber = (Int) exprs.pollFirst();
+    IntAtom sectionNumber = (IntAtom) exprs.pollFirst();
     
     Expr [] provisions = exprs.toArray(new Expr[exprs.size()]);
     
