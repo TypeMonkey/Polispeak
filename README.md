@@ -1,5 +1,5 @@
 <img src="https://raw.githubusercontent.com/TypeMonkey/Polispeak/master/polispeak.png" width="350">
-####  *Write code that looks like legislation*
+####  ***Write code that looks like legislation***
 
 ## Concepts
 A program in Polispeak is called **Legislation**, which are composed of **Definitions** and **Sections**.
