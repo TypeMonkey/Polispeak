@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
@@ -35,11 +36,78 @@ public class PrecedentAnalyzer {
       Legislation legislation = presenter.getRep();
       
       //check definition types
+      for(Definition def : legislation.getDefinitons().values()) {
+        checkDefinition(def, legislation.getName(), presenters);
+      }
       
       //check section provisions and fulfillment
+      for(Section section : legislation.getSections()) {
+        checkSection(section, legislation.getName(), presenters);
+      }
     }
     
     return presenters;
+  }
+  
+  private static void checkDefinition(Definition def, String host, Map<String, PrecedentPresenter> precedents) {
+    //iterate through definition member types and check if they exist   
+    for(Entry<String, Type> member : def.getMembers().entrySet()) {
+      if (precedents.containsKey(member.getValue().getHostBill())) {
+        PrecedentPresenter targetPrecedent = precedents.get(member.getValue().getHostBill());
+        if (!targetPrecedent.getRep().getDefinitons().containsKey(member.getValue().getTypeName())) {
+          throw new RuntimeException("For the precedent '"+host+
+              "', the definition '"+def.getName()+
+              "' has a member named '"+member.getKey()+
+              "' that has an unfound type '"+member.getValue().getActualValue()+"'");
+        }
+      }
+      else {
+        throw new RuntimeException("For the precedent '"+host+
+            "', the definition '"+def.getName()+
+            "' has a member named '"+member.getKey()+
+            "' that has an unfound type '"+member.getValue().getActualValue()+"'");
+      }
+    }
+  }
+  
+  private static void checkSection(Section sec, String host, Map<String, PrecedentPresenter> precedents) {
+    //iterate through section provision types and check if they exist   
+    for(Entry<String, Type> member : sec.getProvisions().entrySet()) {
+      if (precedents.containsKey(member.getValue().getHostBill())) {
+        PrecedentPresenter targetPrecedent = precedents.get(member.getValue().getHostBill());
+        if (!targetPrecedent.getRep().getDefinitons().containsKey(member.getValue().getTypeName())) {
+          throw new RuntimeException("For the precedent '"+host+
+              "', Section '"+sec.getSectionNumber()+
+              "' has a provision named '"+member.getKey()+
+              "' that has an unfound type '"+member.getValue().getActualValue()+"'");
+        }
+      }
+      else {
+        throw new RuntimeException("For the precedent '"+host+
+            "', Section '"+sec.getSectionNumber()+
+            "' has a provision named '"+member.getKey()+
+            "' that has an unfound type '"+member.getValue().getActualValue()+"'");
+      }
+    }
+    
+    //now check if the fulfilled type exists
+    if (sec.isNotVoid()) {
+      Type resultType = sec.getResultType();
+      if (precedents.containsKey(resultType.getHostBill())) {        
+        PrecedentPresenter targetPresenter = precedents.get(resultType.getHostBill());     
+        Legislation targetLegislation = targetPresenter.getRep();
+        if (!targetLegislation.getDefinitons().containsKey(resultType.getTypeName())) {
+          throw new RuntimeException("For the precedent '"+host+
+              "', Section '"+sec.getSectionNumber()+
+              "' has an unfound fulfillment type '"+resultType.getActualValue()+"'");
+        }
+      }
+      else {
+        throw new RuntimeException("For the precedent '"+host+
+            "', Section '"+sec.getSectionNumber()+
+            "' has an unfound fulfillment type '"+resultType.getActualValue()+"'");
+      }
+    }
   }
   
   private static PrecedentPresenter createPresenter(Class<?> presenter) {
@@ -49,10 +117,12 @@ public class PrecedentAnalyzer {
       final String TITLE = precInfo.title();
       final String DESC = precInfo.desc();
       
-      //Analyze Sections
+      //Analyze Sections      
       
+      //couples the Section object representing its backing method
       class SectionTuple{ 
-        final Section section; final Method method; 
+        final Section section; 
+        final Method method; 
         
         public SectionTuple(Section section, Method method) {
           this.section = section;
@@ -131,15 +201,13 @@ public class PrecedentAnalyzer {
       }
       
       Legislation legislation = new Legislation(1, TITLE, DESC, orderedSections, definitions);
-      return new PrecedentPresenter(legislation, orderedMethods, classes);
+      return new PrecedentPresenter(legislation, presenter, orderedMethods, classes);
     }
     
     return null;
   }
   
-  private static Definition makeDefinition(Class<?> def, PrecDefinition defInfo, String host) {   
-    final String DEF_NAME = def.getSimpleName();
-    
+  private static Definition makeDefinition(Class<?> def, PrecDefinition defInfo, String host) {       
     LinkedHashMap<String, Type> members = new LinkedHashMap<>();
     
     for(Field member : def.getFields()) {
@@ -200,8 +268,10 @@ public class PrecedentAnalyzer {
   
   private static Section makeSection(Method method, PrecSection sectionInfo, String host) {    
     final int secNum = sectionInfo.num();
-    final String secTitle = sectionInfo.title().isEmpty() ? sectionInfo.title() : null;
+    final String secTitle = !sectionInfo.title().isEmpty() ? sectionInfo.title() : null;
     final Type returnType = parseType(sectionInfo.fulfillment());
+    
+    //System.out.println("ANALYZING Section "+secNum+" of "+host+" , TITLE: "+sectionInfo.title());
     
     if (returnType == null) {
       //bad Type! throw error
@@ -236,11 +306,11 @@ public class PrecedentAnalyzer {
     
     //Now check that all parameters have Instance as type
     for(Class<?> ptype : method.getParameterTypes()) {
-      if (!Instance.class.isAssignableFrom(ptype)) {
+      if (Instance.class != ptype) {
         throw new RuntimeException("For the precedent '"+host+
             "', Section "+secNum+
             ". the corresponding method has a parameter type of'"+
-            ptype.getName()+"' which isn't a subclass of Instance.");
+            ptype.getName()+"' which isn't Instance.");
       }
     }
     

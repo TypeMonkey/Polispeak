@@ -1,20 +1,19 @@
 package jg.ps.parser;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import jg.ps.TheConstitution;
 import jg.ps.cohesion.TypeChecker;
 import jg.ps.cohesion.Validator;
 import jg.ps.common.LegislativeException;
+import jg.ps.common.TheConstitution;
+import jg.ps.common.precedent.PrecedentAnalyzer;
+import jg.ps.common.precedent.PrecedentPresenter;
 import jg.ps.parser.nodes.constructs.Legislation;
 import net.percederberg.grammatica.parser.ParseException;
 import net.percederberg.grammatica.parser.ParserCreationException;
@@ -31,7 +30,6 @@ import net.percederberg.grammatica.parser.Token;
  */
 public class Drafter {
   
-  private final Map<String, Legislation> precedents; //founding legislation
   private final String [] bills;
   
   /**
@@ -39,11 +37,10 @@ public class Drafter {
    * @param the paths of all Bills to check
    */
   public Drafter(String ... bills) {
-    this.precedents = new HashMap<>();
     this.bills = bills;
   }
   
-  public Map<String, Legislation> draftLegislation(Class<?> ... precedents){
+  public Map<String, Legislation> draftLegislation(Map<String, PrecedentPresenter> precedents){
     HashMap<String, Legislation> allBills = new HashMap<>();
     
     //parse the bills first
@@ -60,23 +57,15 @@ public class Drafter {
     }
     
     //construct the constitution, and other founding legislation
-    HashSet<String> foundingLegislation = new HashSet<>();
-    
-    TheConstitution theConstitution = TheConstitution.createTheConstitution();
-    Legislation constitution = theConstitution.getConstitution();
-    Legislation stringBill = theConstitution.getStringBill();
-    if (allBills.containsKey(constitution.getName())) {
-      throw new RuntimeException("Oh no! There's a legislation claiming to be 'The Constituion'. Please remove it.");
-    }
-    if (allBills.containsKey(stringBill.getName())) {
-      throw new RuntimeException("Oh no! There's a legislation claiming to be 'The Bill of Strings'. Please remove it.");
+    for(PrecedentPresenter presenter : precedents.values()) {
+      allBills.put(presenter.getRep().getName(), presenter.getRep());
     }
     
-    allBills.put(constitution.getName(), constitution);
-    allBills.put(stringBill.getName(), stringBill);
-    
-    foundingLegislation.add(constitution.getName());
-    foundingLegislation.add(stringBill.getName());
+    //WARN USER if there's precedent called "The Constitution" that's not jg.ps.common.TheConsitution
+    if (precedents.containsKey("The Constitution") && 
+        precedents.get("The Constitution").getBackingClass() != TheConstitution.class) {
+      System.err.println("WARNING: The Constitution being used isn't the one that was drafted by the Founding Fathers!");
+    }
     
     //now continue with validating the submitted legislation  
     Validator validator = new Validator(allBills);
@@ -85,7 +74,7 @@ public class Drafter {
     boolean invalidFound = false;
     
     for(Legislation bill : allBills.values()) {
-      if (!foundingLegislation.contains(bill.getName())) {
+      if (!precedents.containsKey(bill.getName())) {
         //make sure to skip founding legislation!
         List<LegislativeException> exceptions = validator.validate(bill);
         if (!exceptions.isEmpty()) {
@@ -105,7 +94,7 @@ public class Drafter {
     
     TypeChecker checker = new TypeChecker(allBills);
     for(Legislation bill : allBills.values()) {
-      if (!foundingLegislation.contains(bill.getName())) {
+      if (!precedents.containsKey(bill.getName())) {
         //make sure to skip founding legislation!
         checker.check(bill);
       }

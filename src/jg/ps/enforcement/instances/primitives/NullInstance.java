@@ -2,23 +2,23 @@ package jg.ps.enforcement.instances.primitives;
 
 import jg.ps.parser.nodes.atoms.Type;
 
-public class Null extends Primitive<Void>{
+public class NullInstance extends Primitive<Void>{
 
-  private static final Null NULL = new Null();
+  private static final NullInstance NULL = new NullInstance();
   
-  private Null() {
+  private NullInstance() {
     super(Type.NULL_TYPE.getActualValue(), null);
   }
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof Null) {
+    if (o instanceof NullInstance) {
       return true;
     }
     return false;
   }
   
-  public static Null getNullInstance() {
+  public static NullInstance getNullInstance() {
     return NULL;
   }
 }

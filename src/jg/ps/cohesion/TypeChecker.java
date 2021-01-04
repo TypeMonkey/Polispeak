@@ -10,6 +10,7 @@ import jg.ps.cohesion.exception.ConditionalException;
 import jg.ps.cohesion.exception.IllegalHoldException;
 import jg.ps.cohesion.exception.IllegalSectionInvocation;
 import jg.ps.cohesion.exception.IllegalSectionTypeException;
+import jg.ps.cohesion.exception.IllegalTypeUseException;
 import jg.ps.cohesion.exception.InstanciationException;
 import jg.ps.cohesion.exception.UnfoundComponentException;
 import jg.ps.parser.nodes.Conditional;
@@ -41,6 +42,23 @@ public class TypeChecker {
     for(Section section : bill.getSections()) {
       checkSection(section, bill);
     }     
+    
+    //validate sections
+    for(Definition def : bill.getDefinitons().values()) {
+      checkDefinition(def, bill);
+    }
+  }
+  
+  private void checkDefinition(Definition def, Legislation curBill) {
+    for(Type memberType : def.getMembers().values()) {
+      if (memberType.equals(Type.VOID_TYPE) || 
+          memberType.equals(Type.NULL_TYPE)) {
+        throw new IllegalTypeUseException(memberType.getActualValue(), 
+                                          def.getLineNumber(), 
+                                          def.getColumnNumber(), 
+                                          curBill.getName());
+      }
+    }
   }
   
   private void checkSection(Section section, Legislation curBill){    
@@ -52,7 +70,7 @@ public class TypeChecker {
     }
     
     if (recentType == null) {
-      if (section.hasResultType()) {
+      if (section.isNotVoid()) {
         //throw error
         throw new IllegalSectionTypeException(section.getSectionNumber(), 
                                               section.getResultType(), 
@@ -62,7 +80,7 @@ public class TypeChecker {
       }
     }
     else{
-      if (section.hasResultType() && !section.getResultType().equals(recentType)) {
+      if (section.isNotVoid() && !section.getResultType().equals(recentType)) {
         //throw error
         throw new IllegalSectionTypeException(section.getSectionNumber(), 
                                               section.getResultType(), 
@@ -93,6 +111,14 @@ public class TypeChecker {
     }
     else if (expr instanceof Instanciation) {
       Instanciation instanciation = (Instanciation) expr;
+      
+      if (instanciation.getType().equals(Type.VOID_TYPE) || 
+          instanciation.getType().equals(Type.NULL_TYPE)) {
+        throw new IllegalTypeUseException(instanciation.getType().getActualValue(), 
+                                          instanciation.getLineNumber(), 
+                                          instanciation.getColumnNumber(), 
+                                          curBill.getName());
+      }
       
       Legislation hostBill = allBills.get(instanciation.getType().getHostBill());
       Definition target = hostBill.getDefinitons().get(instanciation.getType().getTypeName());
@@ -232,6 +258,14 @@ public class TypeChecker {
     }
     else if (expr instanceof LocalVarDeclr) {
       LocalVarDeclr localVar = (LocalVarDeclr) expr;
+      
+      if (localVar.getType().equals(Type.VOID_TYPE) || 
+          localVar.getType().equals(Type.NULL_TYPE)) {
+        throw new IllegalTypeUseException(localVar.getType().getActualValue(), 
+                                          localVar.getLineNumber(), 
+                                          localVar.getColumnNumber(), 
+                                          curBill.getName());
+      }
       
       Type initialValueType = checkExpr(localVar.getValue(), vars, curBill);
       

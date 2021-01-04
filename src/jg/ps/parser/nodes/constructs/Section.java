@@ -42,8 +42,8 @@ public class Section extends Expr{
   }
   */
   
-  public boolean hasResultType() {
-    return resultType != null;
+  public boolean isNotVoid() {
+    return !resultType.equals(Type.VOID_TYPE);
   }
   
   public Type getResultType() {
@@ -82,7 +82,7 @@ public class Section extends Expr{
     }
     */
 
-    if (hasResultType()) {
+    if (isNotVoid()) {
       section += "   Results in a "+resultType + System.lineSeparator();
     }
     

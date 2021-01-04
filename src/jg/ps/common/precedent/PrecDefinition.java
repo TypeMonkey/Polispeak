@@ -23,8 +23,9 @@ import java.lang.annotation.Target;
  *    
  *  - All fields must be of the type jg.ps.enforcement.instances.Instance
  *  
- *  - There's no more (and no less) than one constructor with the same amount of 
+ *  - There's no more than one constructor with the same amount of 
  *    parameters as there are members.
+ *    * No-arg constructors are ignored
  *    * In spirit of the functional nature of Polispeak, this constructor should do 
  *      no more than initialize its members with the given arguments, but ultimately,
  *      this is at the discretion of the developer. (Please be kind.)

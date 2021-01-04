@@ -30,13 +30,13 @@ A_PHRASE = "A"
 DESIG_PHRASE = "designated as"
 REGARDS = "In Regards to"
 THE_PHRASE = "The"
-NULL = "Null"
 
 //RESERVED NAMES
 INT_PHRASE = "Integer"
 STR_PHRASE = "String"
 FLOAT_PHRASE = "Float"
 UNKNOWN = "Unknown"
+NULL = "Null"
 
 //Local variable tokens
 WITHIN = "Within this new context, set"

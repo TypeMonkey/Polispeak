@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * 
  *    //The @PrecDefinition has more precise guidelines and rules in designing definitions
  *    @PrecDefinition
- *    static class Voter{
+ *    public static class Voter{
  *    
  *      @PrecMember(type="The Constitution$String")
  *      Instance name;  //Has to be of type jg.ps.enforcement.instances.Instance and non-static

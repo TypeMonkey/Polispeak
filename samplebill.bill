@@ -22,7 +22,7 @@ This concludes Section 1
 
 Definition of 'SomeType':
 - An Integer designated as 'val' .
-- A String designated as 'name' .
+- A Void designated as 'name' .
 - In Regards to "The Constitution", A Right designated as 'speech' .
 
 Section 2 - "Second Regulation":

@@ -1,5 +1,7 @@
 package jg.ps.enforcement;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,12 +11,13 @@ import java.util.Map;
 import java.util.Set;
 
 import jg.ps.cohesion.exception.IllegalSectionInvocation;
+import jg.ps.common.precedent.PrecedentPresenter;
 import jg.ps.enforcement.instances.DefInstance;
 import jg.ps.enforcement.instances.Instance;
 import jg.ps.enforcement.instances.StringInstance;
 import jg.ps.enforcement.instances.primitives.FloatInstance;
 import jg.ps.enforcement.instances.primitives.IntValue;
-import jg.ps.enforcement.instances.primitives.Null;
+import jg.ps.enforcement.instances.primitives.NullInstance;
 import jg.ps.parser.nodes.Conditional;
 import jg.ps.parser.nodes.Expr;
 import jg.ps.parser.nodes.InstanceDeref;
@@ -34,11 +37,11 @@ import jg.ps.parser.nodes.constructs.Section;
 public class Executive {
   
   private final Map<String, Legislation> legislations;
-  private final Map<String, List<VirtualSection>> virtualSections;
+  private final Map<String, PrecedentPresenter> precedents;
   
-  public Executive(Map<String, Legislation> legislations, Map<String, List<VirtualSection>> virtualSections) {
+  public Executive(Map<String, Legislation> legislations, Map<String, PrecedentPresenter> precedents) {
     this.legislations = legislations;
-    this.virtualSections = virtualSections;
+    this.precedents = precedents;
   }
   
   public void enforceLegislation(Legislation legislation, Instance ... provisions) {
@@ -80,7 +83,7 @@ public class Executive {
     }
     
     //Set result value to be the Null instance by default
-    Instance lastResult = Null.getNullInstance();
+    Instance lastResult = NullInstance.getNullInstance();
     
     //iterate through section body and enforce each step
     for(Expr step : section.getBody()) {
@@ -88,6 +91,23 @@ public class Executive {
     }
     
     return lastResult;
+  }
+  
+  private Instance fulfillPrecedentSection(Invocation step, Method precSection, Legislation hostBill, Instance [] provisions) {
+      try {
+        
+        Object [] arguments = new Object[provisions.length];
+        for (int i = 0; i < arguments.length; i++) {
+          arguments[i] = provisions[i];
+        }
+        
+        return (Instance) precSection.invoke(null, arguments);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        throw new RuntimeException("Fatal error in invoking Section "+step.getSectionNumber()+
+                                   "of the precedent titled '"+hostBill.getName()+"'"+
+                                   "at ln:"+step.getLineNumber()+", col: "+step.getColumnNumber()+System.lineSeparator()+
+                                   e.getMessage());
+      }
   }
   
   private Instance fulfillStep(Expr step, String currentBill, List<Map<String, Instance>> vMap) {
@@ -104,7 +124,7 @@ public class Executive {
       return new IntValue(integer.getActualValue());
     }
     else if (step instanceof NullValue) {
-      return Null.getNullInstance();
+      return NullInstance.getNullInstance();
     }
     else if (step instanceof Str) {
       Str str = (Str) step;
@@ -140,8 +160,9 @@ public class Executive {
       
       //System.out.println("---FULFILLING SECTION "+targetSection.getSectionNumber()+" of "+hostBill.getName());
       
-      if (virtualSections.containsKey(hostBill.getName())) {
-        return virtualSections.get(hostBill.getName()).get(targetSection.getSectionNumber() - 1).fulfill(provs);
+      if (precedents.containsKey(hostBill.getName())) {
+        Method precSection = precedents.get(hostBill.getName()).getMethods()[targetSection.getSectionNumber() - 1];
+        return fulfillPrecedentSection(invocation, precSection, hostBill, provs);
       }
       else {
         return fulfillSection(targetSection, hostBill.getName(), provs);
@@ -190,7 +211,10 @@ public class Executive {
     throw new RuntimeException("============MAJOR ERROR====== "+step.getClass());
   } 
   
- 
+
+  
+  
+  
   
   
   private static List<Map<String, Instance>> wrap(Map<String, Instance> map){

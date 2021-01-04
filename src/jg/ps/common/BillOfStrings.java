@@ -6,7 +6,7 @@ import jg.ps.enforcement.instances.Instance;
 import jg.ps.enforcement.instances.StringInstance;
 import jg.ps.enforcement.instances.primitives.FloatInstance;
 import jg.ps.enforcement.instances.primitives.IntValue;
-import jg.ps.enforcement.instances.primitives.Null;
+import jg.ps.enforcement.instances.primitives.NullInstance;
 
 @Precedent(title = "The Bill of Strings",
            desc = "A collection of essential procedures to manipulate and characterize String objects")
@@ -20,7 +20,7 @@ public class BillOfStrings {
     StringInstance leftStr = (StringInstance) left;
     StringInstance rightStr = (StringInstance) right;
 
-    return new StringInstance(leftStr.getType() + rightStr.getType());
+    return new StringInstance(leftStr.getValue() + rightStr.getValue());
   }
 
   @PrecSection(num = 2,
@@ -64,7 +64,7 @@ public class BillOfStrings {
       return new StringInstance(String.valueOf(targetString.getValue().charAt((int) i)));
     }
     else {
-      return Null.getNullInstance();
+      return NullInstance.getNullInstance();
     }       
   }
   

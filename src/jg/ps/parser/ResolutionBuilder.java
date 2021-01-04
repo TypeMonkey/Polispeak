@@ -267,7 +267,7 @@ public class ResolutionBuilder extends PolispeakAnalyzer{
       provisions.put(prov.getVarName(), prov.getType());
     }
     
-    Type resultType = null;
+    Type resultType = Type.VOID_TYPE;
     if (exprs.peekFirst() instanceof Type) {
       resultType = (Type) exprs.pollFirst();
     }
